@@ -5,6 +5,16 @@ import Topbar from "../../Components/dashboard/Layout/Topbar";
 import TopStats from "../../Components/dashboard/Sections/TopStats";
 import SecurityChart from "../../Components/dashboard/Charts/SecurityChart";
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
@@ -47,6 +57,36 @@ const Dashboard = () => {
         )
       : 0;
 
+  // 🔥 DATE BASED DATA (LAST 7 DAYS)
+  const dateMap = {};
+
+  const last7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+
+    const key = d.toISOString().split("T")[0];
+    last7Days.push(key);
+    dateMap[key] = 0;
+  }
+
+  scans.forEach((scan) => {
+    if (!scan.createdAt) return;
+
+    const date = new Date(scan.createdAt)
+      .toISOString()
+      .split("T")[0];
+
+    if (dateMap[date] !== undefined) {
+      dateMap[date] += 1;
+    }
+  });
+
+  const timelineData = last7Days.map((date) => ({
+    date: date.slice(5), // show MM-DD
+    scans: dateMap[date],
+  }));
+
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans">
       <Sidebar isOpen={isOpen} />
@@ -67,18 +107,40 @@ const Dashboard = () => {
           />
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+            {/* 🔥 DATE TIMELINE */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-slate-800 mb-4">
-                Security Score Trend
+                Scan Activity (Last 7 Days)
               </h3>
 
-              <div className="flex items-center justify-center h-64 text-slate-400 font-medium">
-                {scans.length === 0
-                  ? "No scan data yet"
-                  : `Latest Score: ${scans[0]?.securityScore || 0}/100`}
+              <div className="h-64">
+                {scans.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-slate-400">
+                    No scan data yet
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={timelineData}>
+                      <CartesianGrid stroke="#e5e7eb" strokeDasharray="5 5" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="scans"
+                        stroke="#3b82f6"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
+            {/* EXISTING PIE */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-slate-800 mb-4">
                 Vulnerability Distribution
@@ -97,6 +159,7 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* RECENT */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-slate-800">
@@ -104,7 +167,7 @@ const Dashboard = () => {
               </h3>
               <button
                 onClick={() => navigate("/dashboard/history")}
-                className="text-blue-600 hover:text-blue-700 font-semibold text-sm transition-colors"
+                className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
               >
                 View all →
               </button>
@@ -112,17 +175,17 @@ const Dashboard = () => {
 
             {scans.length === 0 ? (
               <div className="flex items-center justify-center h-32 text-slate-400">
-                No scans yet. Start your first scan.
+                No scans yet
               </div>
             ) : (
               <div className="space-y-3">
                 {scans.slice(0, 5).map((scan) => (
                   <div
                     key={scan._id}
-                    className="flex justify-between items-center bg-slate-50 border border-slate-100 p-4 rounded-xl hover:bg-slate-100 transition-colors"
+                    className="flex justify-between items-center bg-slate-50 p-4 rounded-xl"
                   >
-                    <span className="font-medium text-slate-700">{scan.targetUrl}</span>
-                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
+                    <span>{scan.targetUrl}</span>
+                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
                       {scan.securityScore}/100
                     </span>
                   </div>
@@ -130,6 +193,7 @@ const Dashboard = () => {
               </div>
             )}
           </div>
+
         </div>
       </div>
     </div>

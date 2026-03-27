@@ -13,6 +13,11 @@ const scanSchema = new mongoose.Schema(
     high: Number,
     medium: Number,
     low: Number,
+    vulnerabilities: [{
+      name: String,
+      risk: String,
+      description: String
+    }]
   },
   { timestamps: true }
 );

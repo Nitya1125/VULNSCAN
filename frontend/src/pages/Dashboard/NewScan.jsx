@@ -19,6 +19,7 @@ const NewScan = () => {
 
   const saveScan = async (scanData) => {
     try {
+      console.log("Full Scan Data:", scanData);
       const token = localStorage.getItem("token");
 
       await axios.post(
@@ -30,6 +31,12 @@ const NewScan = () => {
           high: scanData.summary?.high || 0,
           medium: scanData.summary?.medium || 0,
           low: scanData.summary?.low || 0,
+
+          vulnerabilities: scanData.vulnerabilities?.map(vuln => ({
+            name: vuln.nodeName || "Unknown",
+            risk: vuln.risk || "Medium",
+            description: vuln.other || "No description"
+          })) || []
         },
         {
           headers: {
@@ -61,6 +68,7 @@ const NewScan = () => {
       setProgress(60);
 
       const data = await response.json();
+      saveScan(data);
 
       setProgress(100);
       setIsScanning(false);

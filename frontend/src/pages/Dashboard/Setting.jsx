@@ -12,7 +12,6 @@ function Settings() {
 
   const token = localStorage.getItem("token");
 
-  // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -22,8 +21,8 @@ function Settings() {
           },
         });
 
-        setUsername(res.data.username);
-        setEmail(res.data.email);
+        setUsername(res.data.user.username);
+        setEmail(res.data.user.email);
       } catch (err) {
         console.log(err);
       }
@@ -32,16 +31,20 @@ function Settings() {
     fetchUser();
   }, [token]);
 
-  // Update settings
   const handleSave = async () => {
     try {
+      const data = {
+        username,
+        email,
+      };
+
+      if (password && password.trim() !== "") {
+        data.password = password;
+      }
+
       await axios.put(
         "http://localhost:5000/api/auth/update",
-        {
-          username,
-          email,
-          password,
-        },
+        data,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -49,15 +52,16 @@ function Settings() {
         }
       );
 
+      setPassword("");
       alert("Profile Updated");
     } catch (err) {
       console.log(err);
+      alert("Update Failed");
     }
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-
+    <div className="min-h-screen bg-gray-50 p-8">
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate("/dashboard")}
@@ -87,6 +91,7 @@ function Settings() {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
+
         <div className="bg-white p-6 rounded-xl border">
           <h2 className="text-lg font-semibold mb-4">Security</h2>
 
@@ -99,13 +104,13 @@ function Settings() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+
         <button
           onClick={handleSave}
           className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
         >
           Save Changes
         </button>
-
       </div>
     </div>
   );

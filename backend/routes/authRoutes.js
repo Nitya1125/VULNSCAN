@@ -118,20 +118,36 @@ router.get("/me", verifyToken, async (req, res) => {
 
 router.put("/update", verifyToken, async (req, res) => {
   try {
-    const { username, email } = req.body;
+    const { username, email, password } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { username, email },
-      { new: true }
-    ).select("-password");
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Update username & email
+    if (username) user.username = username;
+    if (email) user.email = email;
+
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    const updatedUser = await User.findById(req.user.id).select("-password");
 
     res.json({
       message: "Profile updated successfully",
-      user,
+      user: updatedUser,
     });
 
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "Update failed",
     });
