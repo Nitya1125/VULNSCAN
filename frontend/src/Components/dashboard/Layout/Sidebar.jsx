@@ -15,7 +15,9 @@ const Sidebar = ({ isOpen }) => {
     { name: "New Scan", icon: Scan, path: "/dashboard/new-scan" },
     { name: "Scan History", icon: History, path: "/dashboard/history" },
     { name: "Reports", icon: FileText, path: "/dashboard/reports" },
-    { name: "Settings", icon: Settings, path: "/dashboard/settings" },
+    {name: "Comparison", icon: FileText, path: "/dashboard/Comparison" },
+    {name: "Settings", icon: Settings, path: "/dashboard/settings" },
+
   ];
   
   const user = {

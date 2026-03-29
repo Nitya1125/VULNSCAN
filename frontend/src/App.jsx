@@ -15,6 +15,7 @@ import ScanHistory from "./pages/Dashboard/ScanHistory";
 import Report from "./pages/Dashboard/Report";
 import Profile from "./pages/Dashboard/Profile";
 import Settings from "./pages/Dashboard/Setting";
+import Comparison from "./pages/Dashboard//Comparison";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -86,6 +87,10 @@ function App() {
             <Profile />
           </PrivateRoute>
         } />
+
+        <Route path="/dashboard/Comparison" element={
+          <PrivateRoute><Comparison/></PrivateRoute>
+        }/>
 
         <Route path="/dashboard/settings" element={
           <PrivateRoute>
