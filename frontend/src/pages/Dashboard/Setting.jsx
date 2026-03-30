@@ -98,7 +98,7 @@ function Settings() {
           <label className="text-sm text-gray-600">New Password</label>
           <input
             type="password"
-            placeholder="Enter new password"
+            placeholder="Enter new Password"
             className="w-full border rounded-lg p-2"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
